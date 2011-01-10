@@ -1,0 +1,21 @@
+lib/Pod/POM/View/TextBasic.pm
+lib/Pod/Spelling.pm
+lib/Pod/Spelling/Aspell.pm
+lib/Pod/Spelling/Ispell.pm
+lib/Test/Pod/Spelling.pm
+MANIFEST			This list of files
+MANIFEST.skip
+t/bad.pod
+t/good.pod
+t/manifest.t
+t/pod_format.t
+t/pod_spelling_aispell.t
+t/pod_spelling_base.t
+t/pod_spelling_base_cb.t
+t/pod_spelling_import_speller.t
+t/pod_wordlist.pod
+t/test_pod_spelling.t
+t/textbasic.t
+README
+META.yml                                 Module meta-data (added by MakeMaker)
+SIGNATURE                                Public-key signature (added by MakeMaker)
