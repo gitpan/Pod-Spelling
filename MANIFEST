@@ -6,6 +6,7 @@ lib/Pod/Spelling/Ispell.pm
 lib/Test/Pod/Spelling.pm
 MANIFEST			This list of files
 MANIFEST.skip
+Makefile.PL
 t/bad.pod
 t/good.pod
 t/manifest.t

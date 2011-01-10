@@ -1,6 +1,9 @@
 CHANGES
 
 0.2 2011-01-10
+	Forgot the Makefile.PL and manifest tests didn't pick it up.
+	
+0.2 2011-01-10
 	Just found Test::Spelling, so made this module API-compatible
 	
 0.1	2011-01-10

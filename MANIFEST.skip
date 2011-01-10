@@ -6,5 +6,4 @@ blib.*?$
 .*#$
 .*temp.*
 .*Untitled.*
-Form/Sensible/Field.*
 .*tar\.gz$
