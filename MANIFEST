@@ -1,3 +1,4 @@
+Changes
 lib/Pod/POM/View/TextBasic.pm
 lib/Pod/Spelling.pm
 lib/Pod/Spelling/Aspell.pm
@@ -15,6 +16,7 @@ t/pod_spelling_base_cb.t
 t/pod_spelling_import_speller.t
 t/pod_wordlist.pod
 t/test_pod_spelling.t
+t/test_pod_spelling_add_stopwords.t
 t/textbasic.t
 README
 META.yml                                 Module meta-data (added by MakeMaker)

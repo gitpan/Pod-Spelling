@@ -1,0 +1,8 @@
+CHANGES
+
+0.2 2011-01-10
+	Just found Test::Spelling, so made this module API-compatible
+	
+0.1	2011-01-10
+	Initial version
+	

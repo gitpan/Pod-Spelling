@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 package Test::Pod::Spelling;
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 =head1 NAME
 
@@ -11,7 +11,8 @@ Test::Pod::Spelling - A Test library to spell-check POD files
 =head1 SYNOPSIS
 
 	use Test::Pod::Spelling;
-	all_pod_spelling_ok();
+	all_pod_files_spelling_ok();
+	add_stopwords(qw( Goddard inine ));
 	done_testing();
 
 	use Test::Pod::Spelling (
@@ -22,8 +23,8 @@ Test::Pod::Spelling - A Test library to spell-check POD files
 			},
 		);
 	};
-	pod_spelling_ok( 't/good.pod' );
-	all_pod_spelling_ok();
+	pod_file_spelling_ok( 't/good.pod' );
+	all_pod_files_spelling_ok();
 	done_testing();
 	
 =head1 DESCRIPTION
@@ -64,11 +65,12 @@ require Pod::Spelling;
 use Carp;
 
 my $Test = Test::Builder->new;
+$Test->{_skip_files} = {};
 
 =head1 EXPORTS
 
-	all_pod_spelling_ok() 
-	pod_spelling_ok() 
+	all_pod_files_spelling_ok() 
+	pod_file_spelling_ok() 
 
 =cut
 
@@ -79,8 +81,8 @@ sub import {
     
     # Get the spelling argument:
     for my $i (0..$#args){
-    	if ($args[$i] eq 'spelling'){
-    		confess 'During import, "spelling" argument must point to a HASH or Pod::Spelling object'
+    	if ($args[$i] and $args[$i] eq 'spelling'){
+    		confess 'During import, the "spelling" argument must point to a HASH or Pod::Spelling object'
     			if $i==$#args
     			or not ref($args[$i+1]) 
     			or ref($args[$i+1]) !~ /^(HASH|Pod::Spelling.*)$/; 
@@ -91,15 +93,26 @@ sub import {
 				0..$i-1,
 				$i+2 .. $#args
 			];
-    		last;
     	}
+    	if ($args[$i] and $args[$i] eq 'skip'){
+    		confess 'During import, the "skip" argument must point to an ARRAY'
+    			if $i==$#args
+    			or not ref($args[$i+1]) 
+    			or ref($args[$i+1]) ne 'ARRAY'; 
+    		$Test->{_skip_files} = { map {$_=>1} $args[$i+1] };
+			# Remove from args that will be passed to plan()
+    		@args = @args[
+				0..$i-1,
+				$i+2 .. $#args
+			];
+		}
     }
     
     $Test->{_speller} = Pod::Spelling->new( $spelling_args );
     
     my $caller = caller;
 
-    for my $func ( qw( all_pod_spelling_ok pod_spelling_ok )) {
+    for my $func ( qw( add_stopwords all_pod_files_spelling_ok pod_file_spelling_ok )) {
         no strict 'refs';
         *{$caller."::".$func} = \&$func;
     }
@@ -110,7 +123,7 @@ sub import {
 
 =head1 METHODS
 
-=head2 C<all_pod_spelling_ok( [@entries] )>
+=head2 C<all_pod_files_spelling_ok( [@entries] )>
 
 Exactly the same as L<Test::Pod/all_pod_files_ok( [@entries] )>
 except that it calls L<Test::Pod/pod_file_ok( FILENAME[, TESTNAME ] )>
@@ -118,13 +131,13 @@ to check the spelling of POD files.
 
 =cut
 
-sub all_pod_spelling_ok {
+sub all_pod_files_spelling_ok {
 	my @args = @_ ? @_ : Test::Pod::_starting_points();
     my @paths = map { -d $_ ? Test::Pod::all_pod_files($_) : $_ } @args;
     my @errors;
     
     foreach my $path (@paths){
-    	push @errors, pod_spelling_ok( $path );
+    	push @errors, pod_file_spelling_ok( $path );
     }
     
     return keys %{{
@@ -132,15 +145,17 @@ sub all_pod_spelling_ok {
 	}};
 }
 
-=head2 C<pod_spelling_ok( FILENAME[, TESTNAME ] )>
+=head2 C<pod_file_spelling_ok( FILENAME[, TESTNAME ] )>
 
 Exactly the same as L<Test::Pod/pod_file_ok( FILENAME[, TESTNAME ] )>
 except that it checks the spelling of POD files.
 
 =cut
 
-sub pod_spelling_ok {
+sub pod_file_spelling_ok {
 	my ($path, $name) = @_;
+	
+	return if exists $Test->{_skip_files}->{$path};
 	
 	# All good POD has =head1 NAME\n\n$TITLE - $DESCRIPTION
 	# so add that title to the dictionary. It may be a script name
@@ -181,6 +196,17 @@ sub pod_spelling_ok {
 	}
 	
 	return @errors;
+}
+
+=head2 add_stopwords( @words )
+
+Adds a list of stop-words to those already being used by the spell-checker.
+
+=cut
+
+sub add_stopwords {
+	$Test->{_speller}->add_allow_words( @_ );
+	return 1;
 }
 
 1;
