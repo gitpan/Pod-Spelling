@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 package Pod::Spelling;
-our $VERSION = 0.1;
+our $VERSION = 0.2; # Typo warnings::warn
 
 use Pod::POM;
 
@@ -66,7 +66,7 @@ sub import_speller {
 	eval "require $class";	
 
 	if ($@){
-		warnings:warnif($@);
+		warnings::warnif($@);
 		$self->{spell_check_callback} = undef;
 		return undef;
 	}

@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Pod-Spelling
-version:            0.4
+version:            0.5
 abstract:           Send POD to a spelling checker
 author:
     - Lee Goddard <lgoddard@cpan.org>
