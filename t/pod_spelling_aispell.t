@@ -1,8 +1,7 @@
 use strict;
 use warnings;
 
-use Test::Most;
-die_on_fail();
+use Test::More;
 
 use lib 'lib';
 
