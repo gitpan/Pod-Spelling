@@ -4,7 +4,7 @@ use warnings;
 package Pod::POM::View::TextBasic;
 our $VERSION = 0.1;
 
-use parent 'Pod::POM::View::Text';
+use base 'Pod::POM::View::Text';
 
 our $DROPS = 1;
 
