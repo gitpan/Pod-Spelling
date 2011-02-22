@@ -3,6 +3,7 @@ use warnings;
 
 package Pod::Spelling::Aspell;
 use base 'Pod::Spelling';
+use Carp;
 no warnings 'redefine';
 
 our $VERSION = 0.1;
@@ -18,7 +19,7 @@ sub _init {
 		
 	$self->{aspell}->check('house');
 	return $self->{aspell}->errstr if $self->{aspell}->errstr;
-	
+	Carp::croak $self if not ref $self;
 	return $self;
 }
 

@@ -5,7 +5,28 @@ use Test::More;
 
 use lib 'lib';
 
+BEGIN {
+	my $no_pm;
+	eval { require Lingua::Ispell };
+	if ($@){
+		eval { 
+			require Text::Aspell;
+			my $o = Text::Aspell->new;
+			$o->check('house');
+			die $o->errstr if $o->errstr;
+		};
+	}
+	if ($@){
+		plan skip_all => 'requires Lingua::Ispell or Text::Aspell' ; 
+		$no_pm ++;
+	}
+	if (!$no_pm) {
+		plan tests => 21;
+	}
+}
+
 eval "use Test::Pod::Spelling spelling";
+
 isnt($@, undef, 'bad import');
 
 eval {
@@ -20,6 +41,7 @@ eval {
 };
 
 is( $@, '', 'use_ok' );
+
 
 my $rv = eval { pod_file_spelling_ok( 't/good.pod' ) };
 is( $@, '', 'no errors');
@@ -45,7 +67,7 @@ is( $@, '', 'no errors');
 is( $rv, 0, 'Test/Pod/Spelling.pm' );
 
 
-done_testing( 22 );
+done_testing( );
 
 
 

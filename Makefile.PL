@@ -7,7 +7,7 @@ WriteMakefile(
   license( 'perl' ),
   NAME          => 'Pod::Spelling',
   AUTHOR        => 'Lee Goddard <lgoddard@cpan.org>',
-  VERSION		=> '0.5',
+  VERSION		=> '0.6',
   ABSTRACT_FROM => 'lib/Pod/Spelling.pm',
   PL_FILES      => {},
   PREREQ_PM     => {

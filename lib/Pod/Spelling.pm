@@ -48,16 +48,17 @@ sub new {
 				last if $self->import_speller( 'Pod::Spelling::'.$mod );
 			}
 		}
-		
 		$self = $self->_init;
 	}
 
-	Carp::croak 'Could not instantiate any spell checker. Do you have Ispell or Aspell installed with dictionaries?'
-	if not $self->{spell_check_callback};
+	Carp::confess 'Could not instantiate any spell checker. Do you have Ispell or Aspell installed with dictionaries?'
+		if not $self->{spell_check_callback};
 
 	return $self;
 }
 
+# Abstract method to be implemented by sub-classes:
+# if AOK, return calling object, otherwise error string.
 sub _init { return $_[0] }
 
 sub import_speller {
