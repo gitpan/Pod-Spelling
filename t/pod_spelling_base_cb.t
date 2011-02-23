@@ -19,7 +19,7 @@ BEGIN {
 		$no_pm ++;
 	}
 	if (!$no_pm) {
-		plan tests => 21;
+		plan tests => 3;
 	}
 }
 

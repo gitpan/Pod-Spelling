@@ -6,7 +6,6 @@ use Test::More;
 use lib 'lib';
 
 BEGIN {
-	my $no_pm;
 	eval { require Lingua::Ispell };
 	if ($@){
 		eval { 
@@ -18,10 +17,6 @@ BEGIN {
 	}
 	if ($@){
 		plan skip_all => 'requires Lingua::Ispell or Text::Aspell' ; 
-		$no_pm ++;
-	}
-	if (!$no_pm) {
-		plan tests => 21;
 	}
 }
 
