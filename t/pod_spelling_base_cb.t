@@ -4,7 +4,6 @@ use warnings;
 use Test::More;
 
 BEGIN {
-	my $no_pm;
 	eval { require Lingua::Ispell };
 	if ($@){
 		eval { 
@@ -16,10 +15,6 @@ BEGIN {
 	}
 	if ($@){
 		plan skip_all => 'requires Lingua::Ispell or Text::Aspell' ; 
-		$no_pm ++;
-	}
-	if (!$no_pm) {
-		plan tests => 3;
 	}
 }
 
@@ -40,5 +35,5 @@ like(
 	'override callback'
 );
 
-done_testing( 3 );
+done_testing();
 

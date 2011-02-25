@@ -2,6 +2,9 @@ use strict;
 use warnings;
 
 use Test::More;
+use Data::Dumper;
+use Cwd;
+
 use lib 'lib';
 
 BEGIN {
@@ -31,21 +34,24 @@ BEGIN {
 
 no warnings 'Pod::Spelling';
 
+my $rv;
+
 my $o = eval { Pod::Spelling->new };
 
 isa_ok( $o, 'Pod::Spelling') or BAIL_OUT "";
 
-ok( $o->check_file( 't/good.pod' ), 'default dummy callback');
+diag getcwd();
+
+$rv = $o->check_file( 't/good.pod' );
+ok( $rv, 'default dummy callback')
+	or die Dumper $rv;
 
 $o = Pod::Spelling->new( use_pod_wordlist => 1, );
 
 isa_ok( $o, 'Pod::Spelling');
 
-is( 
-	$o->check_file( 't/pod_wordlist.pod' ), 
-	0,
-	'even default dummy callback passes pod-wordlist'
-);
+$rv = 	$o->check_file( 't/pod_wordlist.pod' );
+is( $rv, 0, 'even default dummy callback passes pod-wordlist' );
 
 $o = Pod::Spelling->new( allow_words => 'Goddard', );
 isa_ok( $o, 'Pod::Spelling');

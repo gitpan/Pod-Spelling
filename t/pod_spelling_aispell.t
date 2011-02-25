@@ -6,7 +6,6 @@ use Test::More;
 use lib 'lib';
 
 BEGIN {
-	my $no_pm;
 	eval { require Lingua::Ispell };
 	if ($@){
 		eval { 
@@ -18,10 +17,6 @@ BEGIN {
 	}
 	if ($@){
 		plan skip_all => 'requires Lingua::Ispell or Text::Aspell' ; 
-		$no_pm ++;
-	}
-	if (!$no_pm) {
-		plan tests => 13;
 	}
 }
 
@@ -47,27 +42,28 @@ foreach my $pm (qw(
 		SKIP: {
 			skip "Did not find $class", 6 if not ref $o;
 		
+			ok((-e 't/good.pod'), 'Got file');
 			my @r = $o->check_file( 't/good.pod' );
 			
-			is(  @r, 1, 'Expected errors' );
-			is( $r[0], 'Goddard', 'Known unknown word');
+			is(  @r, 1, 'Expected errors with '.$class );
+			is( $r[0], 'Goddard', 'Known unknown word with '.$class)
+				or diag Dumper $o;
 			
-			$o = $class->new(
-				allow_words => 'Goddard'
-			);
-			isa_ok( $o, $class);
-			@r = $o->check_file( 't/good.pod' );
-			is(  @r, 0, 'No errors' );
-			
-			
-			$o = $class->new(
-				allow_words => ['Goddard'],
-			);
-			
-			isa_ok( $o, $class);
-			@r = $o->check_file( 't/good.pod' );
-			is(  @r, 0, 'No errors' );
+			foreach (
+				$class->new( allow_words => 'Goddard' ),
+				$class->new( allow_words => ['Goddard'] ),
+			){
+				$o = $class->new(
+					allow_words => 'Goddard'
+				);
+				isa_ok( $o, $class);
+				@r = $o->check_file( 't/good.pod' );
+				is(  @r, 0, 'No errors for allow_words/STRING '.$class );
+			}
 		}
 	}
 }
+
+done_testing();
+
 
