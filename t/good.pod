@@ -20,4 +20,4 @@ Here is C<code>, I<italic>, B<bold>, F<Ignore.html>, and L<link description|link
 
 =head1 AUTHOR
 
-Lee Goddard. Copyright (C) Lee Goddard 2011. All Rights Reserved.
+Lee Goddard. Copyright (C) Lee Goddard. All Rights Reserved.

@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 package Pod::Spelling;
-our $VERSION = 0.2; # Typo warnings::warn
+our $VERSION = 0.3; # Fixed typo in POD
 
 use Pod::POM;
 
@@ -174,9 +174,11 @@ Pod::Spelling - Send POD to a spelling checker
 
 This module provides extensible spell-checking of POD.
 
-At present, it requires either Lingua::Ispell and Text::Aspell,
+At present, it requires either L<Lingua::Ispell> or L<Text::Aspell>,
 one of which  must be installed on your system, with its binaries, 
-unless you plan to use the API to provide your own spell-checker.
+unless you plan to use the API to provide your own spell-checker. In
+the latter case, or if binaries are missing from their default locations,
+expect test failures.
 
 =head1 TEXT NOT SPELL-CHECKED
 
