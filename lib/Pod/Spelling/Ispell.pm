@@ -6,7 +6,7 @@ package Pod::Spelling::Ispell;
 use base 'Pod::Spelling';
 no warnings 'redefine';
 
-our $VERSION = 0.1;
+our $VERSION = 0.2;
 
 require Lingua::Ispell;
 
@@ -33,8 +33,12 @@ sub _init {
 		}
 	}
 
-	$Lingua::Ispell::path = $self->{ispell_path} if defined $self->{ispell_path};
-	
+	if (defined $self->{ispell_path}){
+		$Lingua::Ispell::path = $self->{ispell_path} 
+	} else {
+		$self->{spell_check_callback} = undef;	
+	}
+
 	return $self;
 }
 
