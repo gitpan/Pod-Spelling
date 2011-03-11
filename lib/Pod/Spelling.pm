@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 package Pod::Spelling;
-our $VERSION = 0.3; # Fixed typo in POD
+our $VERSION = 0.4; # Catch undefined
 
 use Pod::POM;
 
@@ -132,8 +132,10 @@ sub check_file {
 	foreach my $text ( split/[\n\r\f]+/, scalar $pom->content()) {
 		$text = $self->_clean_text( $text );
 		my @err = $self->$code( $text );
-		push @rv, @err;
-		$self->{errors}->[$line] = \@err;
+		if (@err){
+			push @rv, @err;
+			$self->{errors}->[$line] = \@err;
+		}
 		$line ++;
 	}
 	

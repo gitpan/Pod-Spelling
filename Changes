@@ -1,5 +1,8 @@
 CHANGES
 
+0.12 2011-03-11
+	Try to catch bad installs of binary spellers
+	
 0.11 2011-03-10
 	Ispell.pm exists but Ispell not found
 

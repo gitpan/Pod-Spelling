@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 package Test::Pod::Spelling;
-our $VERSION = '0.2';
+our $VERSION = '0.3'; # Catch undefined
 
 =head1 NAME
 
@@ -186,7 +186,7 @@ sub pod_file_spelling_ok {
 	if (@errors){
 		foreach my $line ( 0 .. $#{ $Test->{_speller}->{errors} }){
 			my $misspelt = $Test->{_speller}->{errors}->[$line];
-			if (scalar @$misspelt){
+			if ($misspelt and scalar @$misspelt){
 				$Test->diag( 
 					$path . ' (pod line ' . ($line+1) . '): '
 					. join ', ', map("\"$_\"", @$misspelt)

@@ -34,7 +34,6 @@ sub _spell_check_callback {
 			and not $self->{aspell}->errstr;
 	}
 	
-	
 	return keys %$errors;
 }
 

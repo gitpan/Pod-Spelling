@@ -4,28 +4,94 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 my $ok;
-my @m = qw( Text::Aspell Lingua::Ispell );
+my @errors;
 
-foreach (@m){
-	eval "require $_";
-	if (not $@){
-		$ok = 1;
+{
+	eval "require Text::Aspell";
+	if ($@){
+		push(@errors, "No Text::Aspell installed");
 		last;
+	}
+	
+	my $aspell = Text::Aspell->new;
+	if (not $aspell){
+		push @errors, 'Could not make Aspell object';
+		last;
+	}
+
+	$aspell->check('house');
+	if ($aspell->errstr){
+		push @errors, 'Aspell: ' . $aspell->errstr;
+		last;
+	}
+	
+	$ok = 1;
+}
+
+if (not $ok){
+	eval "require Lingua::Ispell";
+	if ($@){
+		push @errors, 'No Ispell';
+		last;
+	}
+	
+	FIND: 
+	foreach my $p (
+		'', # Already on the PATH?
+		qw( 
+			/usr/local/bin/
+			/usr/local/sbin/
+			/usr/bin/
+			/opt/usr/bin/
+			/opt/local/bin/
+		)
+	){
+		my $path = $p . ($^O eq 'MSWin32'? 'ispell.exe' : 'ispell');
+		if (`$path -v`){
+			no warnings;
+			$Lingua::Ispell::path = $path;
+			$ok = 1;
+			last FIND;
+		}
+		push @errors, "Could not find ispell as $path";
+	}
+	
+	if ($ok){
+		$ok = undef;
+		my $r = eval { Lingua::Ispell::spellcheck( 'house' ) };
+		if ($@){
+			push @errors, "Ispell died: $@";
+		}
+		elsif (not ref $r){
+			push @errors, "Ispell returned not a ref but $r";	
+		}
+		elsif ($r->{type} =~ /^(miss|guess|none)$/){
+			push @errors, "Ispell could not spell 'house'";
+		} 
+		else {
+			$ok = 1;
+		}
 	}
 }
 
-
 if (not $ok){
-	print "This module requires you have installed on your system
-one of either ", join(', ', @m), " Perl modules.\n";
-	print <<_STOP_
+	print <<_STOP_;
 
-It appears you have none of these.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-If you feel this message to be in error, please contact
+This module  requires you  have  installed  on your system
+one of either Lingua::Ispell or  Text::Aspell Perl modules,
+along with their binaries, and that they are configured to 
+function correctly: it appears this is not the case.
+
+If you feel this  message to be  in  error, please contact
 the author via LGoddard-at-CPAN-dot-org.
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 _STOP_
+
+	warn join "\n", @errors;
 } 
 
 else {
@@ -35,7 +101,7 @@ else {
 	  license( 'perl' ),
 	  NAME          => 'Pod::Spelling',
 	  AUTHOR        => 'Lee Goddard <lgoddard@cpan.org>',
-	  VERSION		=> '0.11',
+	  VERSION		=> '0.12',
 	  ABSTRACT_FROM => 'lib/Pod/Spelling.pm',
 	  PL_FILES      => {},
 	  PREREQ_PM     => {
