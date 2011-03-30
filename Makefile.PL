@@ -32,44 +32,45 @@ if (not $ok){
 	eval "require Lingua::Ispell";
 	if ($@){
 		push @errors, 'No Ispell';
-		last;
-	}
-	
-	FIND: 
-	foreach my $p (
-		'', # Already on the PATH?
-		qw( 
-			/usr/local/bin/
-			/usr/local/sbin/
-			/usr/bin/
-			/opt/usr/bin/
-			/opt/local/bin/
-		)
-	){
-		my $path = $p . ($^O eq 'MSWin32'? 'ispell.exe' : 'ispell');
-		if (`$path -v`){
-			no warnings;
-			$Lingua::Ispell::path = $path;
-			$ok = 1;
-			last FIND;
-		}
-		push @errors, "Could not find ispell as $path";
-	}
-	
-	if ($ok){
-		$ok = undef;
-		my $r = eval { Lingua::Ispell::spellcheck( 'house' ) };
-		if ($@){
-			push @errors, "Ispell died: $@";
-		}
-		elsif (not ref $r){
-			push @errors, "Ispell returned not a ref but $r";	
-		}
-		elsif ($r->{type} =~ /^(miss|guess|none)$/){
-			push @errors, "Ispell could not spell 'house'";
-		} 
+	} 
 		else {
-			$ok = 1;
+		
+		FIND: 
+		foreach my $p (
+			'', # Already on the PATH?
+			qw( 
+				/usr/local/bin/
+				/usr/local/sbin/
+				/usr/bin/
+				/opt/usr/bin/
+				/opt/local/bin/
+			)
+		){
+			my $path = $p . ($^O eq 'MSWin32'? 'ispell.exe' : 'ispell');
+			if (`$path -v`){
+				no warnings;
+				$Lingua::Ispell::path = $path;
+				$ok = 1;
+				last FIND;
+			}
+			push @errors, "Could not find ispell as $path";
+		}
+		
+		if ($ok){
+			$ok = undef;
+			my $r = eval { Lingua::Ispell::spellcheck( 'house' ) };
+			if ($@){
+				push @errors, "Ispell died: $@";
+			}
+			elsif (not ref $r){
+				push @errors, "Ispell returned not a ref but $r";	
+			}
+			elsif ($r->{type} =~ /^(miss|guess|none)$/){
+				push @errors, "Ispell could not spell 'house'";
+			} 
+			else {
+				$ok = 1;
+			}
 		}
 	}
 }
@@ -92,16 +93,19 @@ the author via LGoddard-at-CPAN-dot-org.
 _STOP_
 
 	warn join "\n", @errors;
+	warn "Writing Makefile anyway\n";
 } 
 
-else {
+# else 
+{
+	
 	
 	WriteMakefile(
 	  ( MM->can( 'signature_target' ) ? ( SIGN => 1 ) : () ),
 	  license( 'perl' ),
 	  NAME          => 'Pod::Spelling',
 	  AUTHOR        => 'Lee Goddard <lgoddard@cpan.org>',
-	  VERSION		=> '0.12',
+	  VERSION		=> '0.13',
 	  ABSTRACT_FROM => 'lib/Pod/Spelling.pm',
 	  PL_FILES      => {},
 	  PREREQ_PM     => {
