@@ -1,3 +1,4 @@
+.*\.yml
 .*\.old$
 .*\.bak$
 Makefile

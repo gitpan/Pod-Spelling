@@ -97,8 +97,8 @@ sub _clean_text {
 	return '' if not $text;
 	
 	$text =~ s/(\w+::)+\w+/ /gs;	# Remove references to Perl modules
-	$text =~ s/[\s]+/ /gs;
-	$text =~ s/[\W]+/ /gs;			# Remove punctuation
+	$text =~ s/\s+/ /gs;
+	$text =~ s/[,;:"\/]+/ /gs;			# Remove punctuation
 	
 	foreach my $word (  @{$self->{allow_words}} ){
 		next if not $word;

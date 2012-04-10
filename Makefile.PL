@@ -101,11 +101,11 @@ _STOP_
 	
 	
 	WriteMakefile(
-	  ( MM->can( 'signature_target' ) ? ( SIGN => 1 ) : () ),
+	  # ( MM->can( 'signature_target' ) ? ( SIGN => 1 ) : () ),
 	  license( 'perl' ),
 	  NAME          => 'Pod::Spelling',
 	  AUTHOR        => 'Lee Goddard <lgoddard@cpan.org>',
-	  VERSION		=> '0.13',
+	  VERSION		=> '0.14',
 	  ABSTRACT_FROM => 'lib/Pod/Spelling.pm',
 	  PL_FILES      => {},
 	  PREREQ_PM     => {

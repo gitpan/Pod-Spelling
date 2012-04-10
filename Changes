@@ -1,5 +1,10 @@
 CHANGES
 
+0.14 2011-04-10
+	Allow *.yml files from more recent Perls than originally used in dev
+
+0.13 ...
+
 0.12 2011-03-11
 	Try to catch bad installs of binary spellers
 	

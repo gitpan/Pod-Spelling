@@ -23,7 +23,7 @@ BEGIN {
 		$no_pm ++;
 	}
 	if (!$no_pm) {
-		plan tests => 7;
+		plan tests => 8;
 	}
 }
 
@@ -61,6 +61,8 @@ unlike(
 	qr/Goddard/,
 	'even default dummy callback passes allow_word'
 );
+
+is( $o->check_file('t/rt_75228.txt'), 0, 'apostrophes');
 
 done_testing();
 
