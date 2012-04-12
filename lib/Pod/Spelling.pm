@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 package Pod::Spelling;
-our $VERSION = 0.4; # Catch undefined
+our $VERSION = 0.6; # Catch undefined
 
 use Pod::POM;
 
@@ -98,10 +98,10 @@ sub _clean_text {
 	
 	$text =~ s/(\w+::)+\w+/ /gs;	# Remove references to Perl modules
 	$text =~ s/\s+/ /gs;
-	$text =~ s/[,;:"\/]+/ /gs;			# Remove punctuation
+	$text =~ s/[()\@,;:"\/.]+/ /gs;		# Remove punctuation
 	
-	foreach my $word (  @{$self->{allow_words}} ){
-		next if not $word;
+	foreach my $word ( @{$self->{allow_words}} ){
+		next if not defined $word;
 		$text =~ s/\b\Q$word\E\b//g;
 	}
 

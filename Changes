@@ -1,6 +1,9 @@
 CHANGES
 
-0.14 2011-04-10
+0.15 2012-04-12
+	Updated non-word characters removed from words prior to spellcheck
+	
+0.14 2012-04-11
 	Allow *.yml files from more recent Perls than originally used in dev
 
 0.13 ...
