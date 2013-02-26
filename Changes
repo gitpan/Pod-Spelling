@@ -1,4 +1,8 @@
 CHANGES
+0.16 2013-02-26
+	Updated Makefile.PL to accomodate Lingua::Ispell 0.07 API change
+	(no rv for correctly-spelt words)
+	RT 
 
 0.15 2012-04-12
 	Updated non-word characters removed from words prior to spellcheck

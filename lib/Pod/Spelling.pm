@@ -106,6 +106,7 @@ sub _clean_text {
 	}
 
 	unless (exists $self->{no_pod_wordlist}){
+		no warnings 'once';
 		foreach my $word (split /\s+/, $text){
 			$word = '' if exists $Pod::Wordlist::Wordlist->{$word};
 		}
@@ -212,7 +213,7 @@ The name of the module as written in the standard POD manner:
 =item *
 
 Words contained in L<Pod::Wordlist|Pod::Wordlist>, though that can be disabled
-- see L<Pod::Spelling|Pod::Spelling> for details.
+- see the C<no_pod_wordlist>, below.
 
 =back
 	

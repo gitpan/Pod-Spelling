@@ -8,3 +8,4 @@ blib.*?$
 .*temp.*
 .*Untitled.*
 .*tar\.gz$
+MYMETA.json

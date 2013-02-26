@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use ExtUtils::MakeMaker;
+use Data::Dumper;
 
 my $ok;
 my @errors;
@@ -33,7 +34,12 @@ if (not $ok){
 	if ($@){
 		push @errors, 'No Ispell';
 	} 
-		else {
+	
+	elsif (Lingua::Ispell->VERSION < 0.07){
+		push @errors, 'Sorry, only Linuga::Ispell version >= 0.07 is supported ';
+	}
+	
+	else {
 		
 		FIND: 
 		foreach my $p (
@@ -58,14 +64,12 @@ if (not $ok){
 		
 		if ($ok){
 			$ok = undef;
-			my $r = eval { Lingua::Ispell::spellcheck( 'house' ) };
+			my $r;
+			eval { $r = Lingua::Ispell::spellcheck( 'house' ) };
 			if ($@){
 				push @errors, "Ispell died: $@";
 			}
-			elsif (not ref $r){
-				push @errors, "Ispell returned not a ref but $r";	
-			}
-			elsif ($r->{type} =~ /^(miss|guess|none)$/){
+			elsif (ref $r) { # API changed, no rv for correect spelling: $r->{type} =~ /^(miss|guess|none)$/){
 				push @errors, "Ispell could not spell 'house'";
 			} 
 			else {
@@ -105,7 +109,7 @@ _STOP_
 	  license( 'perl' ),
 	  NAME          => 'Pod::Spelling',
 	  AUTHOR        => 'Lee Goddard <lgoddard@cpan.org>',
-	  VERSION		=> '0.15',
+	  VERSION		=> '0.16',
 	  ABSTRACT_FROM => 'lib/Pod/Spelling.pm',
 	  PL_FILES      => {},
 	  PREREQ_PM     => {
