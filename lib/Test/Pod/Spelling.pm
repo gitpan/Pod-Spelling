@@ -1,8 +1,11 @@
 use strict;
 use warnings;
+use utf8;
 
 package Test::Pod::Spelling;
-our $VERSION = '0.3'; # Catch undefined
+our $VERSION = '0.4';
+
+=encoding utf8
 
 =head1 NAME
 
@@ -37,10 +40,14 @@ plan to use the API to provide your own spell-checker.
 As illustrated in L</SYNOPSIS>, above, configuration options for C<Pod::Spelling> can
 be passed when the module is used.
 
-A list of words that can be allowed even if not in the dictionary 
-can be supplied to the spell-checking module when this module is used.
+A list of words that can be allowed even if not in the dictionary (a stop list)
+can be supplied to the spell-checking module when this module is used, via
+L</add_stopwords>.
 To help keep this list short, common POD that would upset the spell-checker
 is skipped - see L<Pod::Spelling/TEXT NOT SPELL-CHECKED> for details.
+No support is offered for inlining stoplists into Perl modules, which the
+author feels undermines testing. Patches to provide such an option will be
+applied, though, if required.
 
 =cut
 
@@ -112,7 +119,10 @@ sub import {
     
     my $caller = caller;
 
-    for my $func ( qw( add_stopwords all_pod_files_spelling_ok pod_file_spelling_ok )) {
+    for my $func ( qw(
+		add_stopwords all_pod_files_spelling_ok pod_file_spelling_ok
+		skip_paths_matching
+	)) {
         no strict 'refs';
         *{$caller."::".$func} = \&$func;
     }
@@ -121,7 +131,30 @@ sub import {
     $Test->plan(@args);
 }
 
-=head1 METHODS
+=head1 EXPORTED SUBROUTINES
+
+=head2 C<skip_paths_matching($re1 [, $reN])>
+
+Supply a list of one or more pre-compiled regular
+expressions to skip any file paths they match.
+
+=cut
+
+sub skip_paths_matching {
+	my @res = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+	my $rv = 1;
+	# Make sure they are regex
+	foreach my $i (@res){
+		if (not ref $i or ref $i ne 'Regexp'){
+			$rv = 0;
+		}
+		else {
+			$Test->{_speller}->skip_paths_matching( $i );
+		}
+	}
+	return $rv;
+}
 
 =head2 C<all_pod_files_spelling_ok( [@entries] )>
 
@@ -136,12 +169,19 @@ sub all_pod_files_spelling_ok {
     my @paths = map { -d $_ ? Test::Pod::all_pod_files($_) : $_ } @args;
     my @errors;
     
-    foreach my $path (@paths){
+    PATH:
+	foreach my $path (@paths){
+		foreach my $re ($Test->{_speller}->skip_paths_matching){
+			if ($path =~ $re){
+				$Test->skip("path $path because of skip_paths_matching $re");
+				next PATH;
+			}
+		}
     	push @errors, pod_file_spelling_ok( $path );
     }
-    
+
     return keys %{{
-    	map {$_=>1} @errors
+    	map {$_=>1} grep {defined} @errors
 	}};
 }
 
@@ -154,8 +194,7 @@ except that it checks the spelling of POD files.
 
 sub pod_file_spelling_ok {
 	my ($path, $name) = @_;
-	
-	return if exists $Test->{_skip_files}->{$path};
+	return () if exists $Test->{_skip_files}->{$path};
 	
 	# All good POD has =head1 NAME\n\n$TITLE - $DESCRIPTION
 	# so add that title to the dictionary. It may be a script name
@@ -167,11 +206,10 @@ sub pod_file_spelling_ok {
 	undef $file;	
 	
 	if ($pod_name){
-		$Test->{_speller}->add_allow_words( $pod_name );
-		my $words;
-		($words = $pod_name) =~ s/:+/ /g;
-		$Test->{_speller}->add_allow_words( 
-			split/\s+/, $words
+		my @words = $pod_name =~ s/:+/ /g;
+		$Test->{_speller}->add_allow_words(
+			$pod_name,
+			split(/\s+/, @words)
 		);
 	}
 	
@@ -187,9 +225,11 @@ sub pod_file_spelling_ok {
 		foreach my $line ( 0 .. $#{ $Test->{_speller}->{errors} }){
 			my $misspelt = $Test->{_speller}->{errors}->[$line];
 			if ($misspelt and scalar @$misspelt){
-				$Test->diag( 
-					$path . ' (pod line ' . ($line+1) . '): '
-					. join ', ', map("\"$_\"", @$misspelt)
+				$Test->diag( sprintf
+					'  Unknown word%s in %s (POD line %d): %s.',
+					(scalar @$misspelt==1? '':'s'),
+					$path, ($line+1), 
+					join ', ', map("\"$_\"", @$misspelt)
 				);
 			}
 		}

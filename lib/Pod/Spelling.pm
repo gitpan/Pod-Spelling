@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use utf8;
 
 package Pod::Spelling;
 our $VERSION = 0.6; # Catch undefined
@@ -22,6 +23,8 @@ sub new {
 		%$args,
 		_parser => Pod::POM->new,
 	}, $class;
+	
+	$self->{skip_paths_matching} ||= [];
 
 	# Allow a single word to be allowed:
 	if ($self->{allow_words}){
@@ -111,6 +114,11 @@ sub _clean_text {
 			$word = '' if exists $Pod::Wordlist::Wordlist->{$word};
 		}
 	}
+
+	# Allow words that are joined by underscores but
+	# which were thought errors: easier than parsing
+	# Perl, for now:
+	$text =~ s/(\w+_\w+||_\w+||\w_)//sg;
 	
 	return $text;
 }
@@ -120,38 +128,85 @@ sub _clean_text {
 # and sets $self->{errors}->[ $line_number-1 ]->[ badly spelt words for this line ]
 sub check_file {
 	my ($self, $path) = @_;
-    my @rv;
-    
+    my ($packages, @rv);
     $self->{errors} = [];
 	
+	foreach my $re (@{ $self->{skip_paths_matching} }){
+		return () if $path =~ $re;
+	}
+
+	# Crude test to allow package names:
+	{
+		open my $IN, $path or confess "$! - $path";
+		read $IN, my $content, -s $IN;
+		close $IN;
+		my @packages = grep {length} $content =~ /^([}{;]+||)\s*package\s+([a-z](?:[\w]+||::)*?)\s*[;{]/img;
+		$packages = { map {$_=>1} @packages };
+		$self->add_allow_words(
+			@packages,				# Whole package names
+			keys %{{				# Parts of package names
+				map {$_=>1} map {
+					split /::/, $_
+				} @packages
+			}}
+		);
+	}
+		
     my $pom = $self->{_parser}->parse_file($path)
     	or confess $self->{_parser}->error();
 
 	my $code = $self->{spell_check_callback};
-    
+	
 	my $line = 0;
 	foreach my $text ( split/[\n\r\f]+/, scalar $pom->content()) {
 		$text = $self->_clean_text( $text );
 		my @err = $self->$code( $text );
+		
+		ERR:
+		foreach my $err (@err){
+			foreach my $word (grep {length} split /\s+/, $text){
+				if ($word =~ /([\d_-]\Q$err\E|\Q$err\E[\d_-])/sg){
+					$err = undef;
+					next ERR;
+				}
+			}
+			# Check packages
+			eval {
+				require $path;
+				foreach my $p (keys %$packages){
+					eval { import $p };
+					# die "$err is a method in $p"
+					undef $err if $p->can( $err );
+				}
+			};
+		}
+		
+		@err = grep {defined} @err;
+		
 		if (@err){
 			push @rv, @err;
 			$self->{errors}->[$line] = \@err;
 		}
 		$line ++;
 	}
-	
+
 	return @rv;
 }
 
 sub add_allow_words {
 	my $self = shift;
-	push @{ $self->{allow_words} }, @_ if $#_;
+	push @{ $self->{allow_words} }, @_ if $#_ > -1;
 }
 
+sub skip_paths_matching {
+	my $self = shift;
+	push @{ $self->{skip_paths_matching} }, @_ if $#_ > -1;
+	return @{ $self->{skip_paths_matching} };
+}
 
 1;
 
-__END__
+=encoding utf8
 
 =head1 NAME
 
@@ -171,6 +226,7 @@ Pod::Spelling - Send POD to a spelling checker
 	my $o = Pod::Spelling->new(
 		allow_words => [qw[ foo bar ]],
 	);
+	$o->skip_paths_matching( qr{*/DBIC} );
 	say 'Spelling errors: ', join ', ', $o->check_file( 'Module.pm' );
 
 =head1 DESCRIPTION
@@ -261,6 +317,10 @@ represents a line in the file, and thus may be empty if there are no spelling er
 
 Add a list of words to the 'allow' list specified at constrution.
 
+=head2 skip_paths_matching
+
+Supply a list of one or more pre-compiled regular expressions to
+avoid parsing directories they match.
 
 =head1 ADDING A SPELL-CHECKER
 

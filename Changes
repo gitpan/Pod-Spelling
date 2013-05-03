@@ -1,4 +1,11 @@
 CHANGES
+0.17 2013-04-04
+	Added skip_paths_matching()
+	Fixed index error
+	Spellers split at dashes, underscores, and numbers, but try
+	to allow that to pass.
+	Crudely test for subs using UNIVERSAL::can
+		
 0.16 2013-02-26
 	Updated Makefile.PL to accomodate Lingua::Ispell 0.07 API change
 	(no rv for correctly-spelt words)
